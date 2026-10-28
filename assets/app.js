@@ -9,6 +9,7 @@
   const TRAIN = typeof FINCH_TRAIN !== 'undefined' ? FINCH_TRAIN : [];
   const TEST = typeof FINCH_TEST !== 'undefined' ? FINCH_TEST : [];
   const ALL = typeof FINCH_ALL !== 'undefined' ? FINCH_ALL : [];
+  const TRAIN22 = typeof FINCH22_TRAIN !== 'undefined' ? FINCH22_TRAIN : TRAIN;
 
   const $ = (s, r = document) => r.querySelector(s);
 
@@ -130,7 +131,38 @@
     el('path', { d, class: cls }, g.series);
   }
 
-  /* ---------- 1) 데이터 미리보기 ---------- */
+  /* ---------- 1) 2-2 분류 복습 ---------- */
+
+  const MYSTERY = [11.5, 4.0];
+
+  function drawRecap() {
+    const mount = $('#chart-22');
+    if (!mount) return;
+    const g = frame(mount, {
+      xd: [7.8, 16], yd: [2.4, 7.3],
+      xticks: [8, 10, 12, 14, 16], yticks: [3, 4, 5, 6, 7],
+      xlabel: '부리 길이', ylabel: '부리 높이'
+    });
+
+    dots(g, TRAIN22.filter(p => p[0] < 11.5), 'pt-a');
+    dots(g, TRAIN22.filter(p => p[0] >= 11.5), 'pt-b');
+
+    TRAIN22
+      .map(p => ({ p, d: (p[0] - MYSTERY[0]) ** 2 + (p[1] - MYSTERY[1]) ** 2 }))
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 5)
+      .forEach(n => el('circle', {
+        cx: g.X(n.p[0]), cy: g.Y(n.p[1]), r: 6.5, class: 'neighbor'
+      }, g.series));
+
+    const mx = g.X(MYSTERY[0]), my = g.Y(MYSTERY[1]);
+    el('path', {
+      d: `M${mx} ${my - 7}L${mx + 6.5} ${my + 4.5}L${mx - 6.5} ${my + 4.5}Z`,
+      class: 'pt-tri'
+    }, g.series);
+  }
+
+  /* ---------- 2) 데이터 미리보기 ---------- */
 
   function drawData() {
     const mount = $('#chart-data');
@@ -203,6 +235,7 @@
   /* ---------- init ---------- */
 
   function renderAll() {
+    drawRecap();
     drawData();
     drawKnn(Number($('#kRange').value));
     drawCompare();

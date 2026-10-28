@@ -422,6 +422,7 @@ blockquote {
 .pt-a { fill: #0f6b52; }
 .pt-b { fill: #b45309; }
 .pt-ghost { fill: #c9c4b7; }
+.pt-tri { fill: #14171c; }
 .neighbor { fill: none; stroke: #b45309; stroke-width: 1.4; }
 .curve-a { fill: none; stroke: #0f6b52; stroke-width: 2.2; stroke-linecap: round; }
 .curve-b { fill: none; stroke: #5b4b8a; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 5 4; }

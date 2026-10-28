@@ -19,24 +19,26 @@
     <p class="label">ML Study · 3주차</p>
     <h1>회귀 알고리즘과<br>모델 규제</h1>
     <p class="lede">
-      교재의 농어 데이터 대신 <strong>핀치부리새의 부리 길이로 부리 높이</strong>를 예측했습니다.
-      3-1·3-2는 직접 실습했고, 3-3은 개념만 정리했습니다.
+      2-2에서 만든 핀치부리새 분류 모델을 복습하고, 같은 데이터를 <strong>부리 길이로 부리 높이를 예측하는 회귀</strong>로
+      바꿔 3-1·3-2를 실습했습니다. 3-3은 개념만 정리했습니다.
     </p>
 
     <dl class="meta">
-      <div><dt>학습 범위</dt><dd>회귀 · 선형 회귀 · 다항 회귀 · 규제</dd></div>
-      <div><dt>실습 데이터</dt><dd>핀치부리새 49마리 (길이 → 높이)</dd></div>
-      <div><dt>실습 노트북</dt><dd><a href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-1/3-1.ipynb" target="_blank" rel="noopener">3-1</a> · <a href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-2/3-2.ipynb" target="_blank" rel="noopener">3-2</a></dd></div>
+      <div><dt>학습 범위</dt><dd>2-2 분류 복습 · 회귀 · 선형/다항 회귀 · 규제</dd></div>
+      <div><dt>실습 데이터</dt><dd>핀치부리새 49마리 (길이 · 높이)</dd></div>
+      <div><dt>실습 노트북</dt><dd><a href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-2-2/2-2.ipynb" target="_blank" rel="noopener">2-2</a> · <a href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-1/3-1.ipynb" target="_blank" rel="noopener">3-1</a> · <a href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-2/3-2.ipynb" target="_blank" rel="noopener">3-2</a></dd></div>
     </dl>
 
     <nav class="toc" aria-label="목차">
       <p class="toc__label">목차</p>
       <ol>
         <li><a href="#week">이번 주에 한 일</a></li>
+        <li><a href="#recap">2-2 · 분류 복습</a></li>
         <li><a href="#data">데이터</a></li>
         <li><a href="#knn">3-1 · KNN 회귀</a></li>
         <li><a href="#line">3-2 · 선형과 다항</a></li>
         <li><a href="#reg">3-3 · 규제</a></li>
+        <li><a href="#concept">개념 정리</a></li>
         <li><a href="#review">회고</a></li>
       </ol>
     </nav>
@@ -50,11 +52,12 @@
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>단계</th><th>한 일</th><th class="num">테스트 R²</th></tr>
+          <tr><th>단계</th><th>한 일</th><th class="num">테스트 점수</th></tr>
         </thead>
         <tbody>
-          <tr><td>3-1</td><td>부리 길이로 높이 예측, k 조절</td><td class="num">0.9817</td></tr>
-          <tr><td>3-2</td><td>선형 회귀와 2차 다항 회귀로 같은 문제</td><td class="num">0.7235 / 0.7745</td></tr>
+          <tr><td>2-2</td><td>길이·높이 두 특성으로 분류, 표준화 적용</td><td class="num">정확도 1.000</td></tr>
+          <tr><td>3-1</td><td>부리 길이로 높이 예측, k 조절</td><td class="num">R² 0.9817</td></tr>
+          <tr><td>3-2</td><td>선형 회귀와 2차 다항 회귀로 같은 문제</td><td class="num">R² 0.7235 / 0.7745</td></tr>
           <tr><td>3-3</td><td>특성 공학과 규제 개념 정리 (실습 없음)</td><td class="num">—</td></tr>
         </tbody>
       </table>
@@ -63,9 +66,52 @@
     <p class="cap">3-1과 3-2는 노트북과 같은 <code>random_state=42</code> 분할로 다시 계산해 확인했습니다.</p>
   </section>
 
-  <!-- 2 -->
+  <!-- 2-2 -->
+  <section class="sec" id="recap">
+    <h2><span class="no">02</span> 2-2 복습 · 두 특성으로 분류하기</h2>
+    <p>3장으로 넘어가기 전에 2-2 모델을 다시 짚었습니다. 부리 <strong>길이와 높이</strong> 두 특성으로 "작은 부리(1) / 큰 부리(0)"를 맞히는 분류입니다.</p>
+    <p>리스트 두 개를 <code>column_stack</code>으로 묶어 (49, 2) 배열을 만들고, 타깃은 <code>ones(35)</code>와 <code>zeros(14)</code>를 이어 붙였습니다. <code>stratify</code>를 주면 테스트 세트에도 두 클래스가 비슷한 비율로 들어갑니다.</p>
+
+<pre><code>bird_data   = np.column_stack((beak_length, beak_height))
+bird_target = np.concatenate((np.ones(35), np.zeros(14)))
+
+X_train, X_test, y_train, y_test = train_test_split(
+    bird_data, bird_target, stratify=bird_target, random_state=42
+)
+
+kn = KNeighborsClassifier()
+kn.fit(X_train, y_train)
+kn.score(X_test, y_test)        <span class="c"># 1.0</span>
+kn.predict([[11.5, 4.0]])       <span class="c"># [0.] → 큰 부리</span></code></pre>
+
+    <figure class="figure">
+      <div class="chart" id="chart-22" role="img" aria-label="훈련 세트 36마리와 11.5, 4.0 지점, 그리고 그 지점에서 가장 가까운 이웃 5마리를 표시한 산점도."></div>
+      <figcaption><span class="dot dot--a"></span> 작은 부리(1) <span class="dot dot--b"></span> 큰 부리(0) — ▲ 예측 지점, ○ 이웃 5마리</figcaption>
+    </figure>
+
+    <p>11.5, 4.0은 두 무리 사이의 빈 공간에 있습니다. 그래도 가장 가까운 5마리가 모두 큰 부리라서 <strong>0</strong>으로 예측합니다. 가장 가까운 이웃은 (12.5, 3.2)로 거리가 1.28입니다.</p>
+
+    <h3>스케일이 다르면 거리가 왜곡된다</h3>
+    <p>길이는 8~15, 높이는 2.7~6.9 범위입니다. 단위가 다르면 거리 계산에서 길이가 더 큰 영향을 주기 때문에, 훈련 세트의 평균과 표준편차로 표준화했습니다.</p>
+
+<pre><code>mean = np.mean(train_input, axis=0)   <span class="c"># [10.71, 5.36]</span>
+std  = np.std(train_input, axis=0)    <span class="c"># [ 2.20, 1.51]</span>
+
+train_scaled = (train_input - mean) / std
+test_scaled  = (test_input  - mean) / std   <span class="c"># 같은 mean/std 사용</span>
+
+kn.fit(train_scaled, train_target)
+kn.score(test_scaled, test_target)    <span class="c"># 1.0</span></code></pre>
+
+    <div class="callout">
+      <strong>테스트 세트는 따로 fit 하지 않는다.</strong>
+      표준화 기준은 훈련 세트에서 구한 평균·표준편차를 그대로 씁니다. 테스트 세트로 다시 구하면 평가가 왜곡됩니다.
+    </div>
+  </section>
+
+  <!-- 3 -->
   <section class="sec" id="data">
-    <h2><span class="no">02</span> 데이터: 핀치부리새 49마리</h2>
+    <h2><span class="no">03</span> 데이터: 핀치부리새 49마리</h2>
     <p>작은 부리 35마리와 큰 부리 14마리로 이루어져 있습니다. 길이가 길수록 높이가 <em>낮아지는</em> 역방향 관계라, 교재의 농어 데이터와는 결이 다릅니다.</p>
 
     <figure class="figure">
@@ -83,9 +129,9 @@ X_train, X_test, y_train, y_test = train_test_split(
 # 36마리 / 13마리</code></pre>
   </section>
 
-  <!-- 3 -->
+  <!-- 3-1 -->
   <section class="sec" id="knn">
-    <h2><span class="no">03</span> 3-1 · k-최근접 이웃 회귀</h2>
+    <h2><span class="no">04</span> 3-1 · k-최근접 이웃 회귀</h2>
     <p>분류와 똑같이 가까운 이웃을 찾고, 타깃만 <strong>다수결이 아니라 평균</strong>으로 정합니다. 정확도 대신 <strong>결정계수 R²</strong>와 <strong>MAE</strong>로 평가합니다.</p>
 
     <div class="callout">
@@ -124,9 +170,9 @@ X_train, X_test, y_train, y_test = train_test_split(
     <p class="cap">거리가 똑같은 이웃이 생기면 sklearn이 어느 쪽을 고르느냐에 따라 소수점 넷째 자리가 0.0001 정도 달라집니다(예: k = 3 → 0.9874 ↔ 0.9875). 표에는 노트북 값을 적었습니다.</p>
   </section>
 
-  <!-- 4 -->
+  <!-- 3-2 -->
   <section class="sec" id="line">
-    <h2><span class="no">04</span> 3-2 · 선형 회귀와 다항 회귀</h2>
+    <h2><span class="no">05</span> 3-2 · 선형 회귀와 다항 회귀</h2>
     <p>KNN은 훈련 데이터의 최대 길이(15.5) 밖을 모릅니다. 30.0을 넣으면 어디까지나 <strong>2.8</strong>에 머뭅니다. 직선과 곡선은 범위 밖도 계속 예측합니다.</p>
 
     <figure class="figure">
@@ -158,9 +204,9 @@ lr.score(test_poly, test_target)   <span class="c"># 0.7745</span></code></pre>
     </div>
   </section>
 
-  <!-- 5 -->
+  <!-- 3-3 -->
   <section class="sec" id="reg">
-    <h2><span class="no">05</span> 3-3 · 특성 공학과 규제</h2>
+    <h2><span class="no">06</span> 3-3 · 특성 공학과 규제</h2>
     <p>3-3은 코드 실습 없이 개념만 정리했습니다. 아래 수치는 교재의 농어 데이터 기준입니다.</p>
 
     <h3>특성을 늘리면 표현력이 커진다</h3>
@@ -189,9 +235,36 @@ lr.score(test_poly, test_target)   <span class="c"># 0.7745</span></code></pre>
     <p><strong>규제</strong>는 계수 크기를 줄여 이 과대적합을 누릅니다. 릿지는 계수를 작게 만들고, 라쏘는 아예 0으로 만들어 버립니다(α = 10에서 55개 중 40개가 0).</p>
   </section>
 
-  <!-- 6 -->
+  <!-- concepts -->
+  <section class="sec" id="concept">
+    <h2><span class="no">07</span> 3장 개념 정리</h2>
+    <p>실습하면서 계속 헷갈렸던 말들을 한 표로 모았습니다.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>용어</th><th>뜻</th></tr></thead>
+        <tbody>
+          <tr><td>회귀</td><td>숫자를 예측합니다. 분류는 클래스를 맞힙니다.</td></tr>
+          <tr><td>결정계수 R²</td><td>1에 가까울수록 좋고, 0은 평균으로 찍는 수준입니다. 음수도 나올 수 있습니다.</td></tr>
+          <tr><td>MAE</td><td>예측과 타깃 차이의 절댓값 평균. 숫자가 그대로 오차 크기입니다.</td></tr>
+          <tr><td>과대적합</td><td>훈련 점수는 높은데 테스트 점수가 크게 떨어지는 상태.</td></tr>
+          <tr><td>과소적합</td><td>모델이 너무 단순해 훈련 세트조차 못 맞히는 상태.</td></tr>
+          <tr><td>외삽</td><td>훈련 범위 밖을 예측하는 일. KNN은 범위 밖을 알지 못합니다.</td></tr>
+          <tr><td>다중 회귀</td><td>특성이 여러 개인 선형 회귀. 특성 2개면 평면을 학습합니다.</td></tr>
+          <tr><td>특성 공학</td><td>기존 특성을 제곱하거나 곱해 새 특성을 만드는 일.</td></tr>
+          <tr><td>규제</td><td>계수 크기를 줄여 과대적합을 누릅니다. 릿지는 L2, 라쏘는 L1.</td></tr>
+          <tr><td>alpha</td><td>규제의 강도. 크면 모델이 단순해지고, 너무 크면 과소적합이 됩니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>alpha도 k처럼 조절하는 손잡이</h3>
+    <p>alpha를 키우면 계수가 0 쪽으로 줄어듭니다. 훈련 점수는 계속 내려가지만 테스트 점수는 어딘가에서 가장 높아졌다가 다시 내려갑니다. 그래서 alpha를 바꿔 가며 가장 좋은 지점을 찾습니다.</p>
+    <p><strong>릿지</strong>는 계수를 작게 만들 뿐 0으로는 만들지 않고, <strong>라쏘</strong>는 계수를 아예 0으로 만들어 쓸모없는 특성을 쳐냅니다. 교재의 라쏘(α = 10)에서는 55개 계수 중 40개가 0이 되었습니다.</p>
+  </section>
+
   <section class="sec" id="review">
-    <h2><span class="no">06</span> 회고</h2>
+    <h2><span class="no">08</span> 회고</h2>
     <blockquote>
       같은 데이터라도 질문을 바꾸면 모델도 지표도 달라진다는 게 이번 주의 가장 큰 수확이었습니다.
       분류에서 1.0이던 정확도가 회귀에서는 R² 0.98이 되고, k 하나로 모델의 성격이 바뀌는 걸 직접 봤습니다.
