@@ -3,817 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>길이로 무게를 맞히다 · 혼공머신 3장 학습 노트</title>
-<meta name="description" content="혼공머신 3장(회귀 알고리즘과 모델 규제) 학습 노트. 농어 데이터를 핀치부리새 데이터로 바꿔 실습한 k-최근접 이웃 회귀, 선형·다항 회귀, 그리고 특성 공학과 규제 개념 정리.">
-<meta name="theme-color" content="#0c1a16">
-<meta property="og:type" content="website">
-<meta property="og:title" content="길이로 무게를 맞히다 · 혼공머신 3장 학습 노트">
-<meta property="og:description" content="k-최근접 이웃 회귀부터 선형·다항 회귀까지, 핀치부리새 데이터로 직접 실습한 기록.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230c1a16'/%3E%3Cpath d='M7 22c4-1 6-4 7-9 1 5 3 8 11 9' fill='none' stroke='%238fd0b8' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>혼공머신 3장 · 회귀 알고리즘과 모델 규제</title>
+<meta name="description" content="혼공머신 3장 학습 노트. 핀치부리새 데이터로 k-최근접 이웃 회귀, 선형·다항 회귀를 실습하고 특성 공학과 규제를 정리했습니다.">
+<meta name="theme-color" content="#faf8f3">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f6b52'/%3E%3Cpath d='M7 22c4-1 6-4 7-9 1 5 3 8 11 9' fill='none' stroke='%23eaf3ee' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<div class="progress" aria-hidden="true"><div class="progress__bar" id="progressBar"></div></div>
 
-<header class="site-header">
-  <div class="site-header__inner">
-    <a class="brand" href="#top">
-      <span class="brand__mark">03</span>
-      <span class="brand__text">ML Study <span>/ 회귀</span></span>
-    </a>
-    <nav class="site-nav" aria-label="주요 섹션">
-      <a href="#knn">3-1 회귀</a>
-      <a href="#linear">3-2 선형</a>
-      <a href="#features">3-3 규제</a>
-      <a href="#compare">비교</a>
-      <a class="gh" href="https://github.com/rlaguswl25808134-source/AID-MLB" target="_blank" rel="noopener">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-        GitHub
-      </a>
+<main class="note" id="top">
+
+  <header class="head">
+    <p class="label">ML Study · 3주차</p>
+    <h1>회귀 알고리즘과<br>모델 규제</h1>
+    <p class="lede">
+      교재의 농어 데이터 대신 <strong>핀치부리새의 부리 길이로 부리 높이</strong>를 예측했습니다.
+      3-1·3-2는 직접 실습했고, 3-3은 개념만 정리했습니다.
+    </p>
+
+    <dl class="meta">
+      <div><dt>학습 범위</dt><dd>회귀 · 선형 회귀 · 다항 회귀 · 규제</dd></div>
+      <div><dt>실습 데이터</dt><dd>핀치부리새 49마리 (길이 → 높이)</dd></div>
+      <div><dt>실습 노트북</dt><dd><a href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-1/3-1.ipynb" target="_blank" rel="noopener">3-1</a> · <a href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-2/3-2.ipynb" target="_blank" rel="noopener">3-2</a></dd></div>
+    </dl>
+
+    <nav class="toc" aria-label="목차">
+      <p class="toc__label">목차</p>
+      <ol>
+        <li><a href="#week">이번 주에 한 일</a></li>
+        <li><a href="#data">데이터</a></li>
+        <li><a href="#knn">3-1 · KNN 회귀</a></li>
+        <li><a href="#line">3-2 · 선형과 다항</a></li>
+        <li><a href="#reg">3-3 · 규제</a></li>
+        <li><a href="#review">회고</a></li>
+      </ol>
     </nav>
-  </div>
-</header>
+  </header>
 
-<main id="top">
-  <section class="hero">
-    <div class="hero__inner">
-      <p class="eyebrow">혼공머신 · Chapter 03</p>
-      <h1>길이로 <em>무게</em>를<br>맞히다</h1>
-      <p class="hero__lede">
-        농어의 길이로 무게를 예측하던 교재 실습을, 우리는 <strong>핀치부리새의 부리 길이로 부리 높이</strong>를
-        예측하는 문제로 바꿔 풀었습니다. k-최근접 이웃 회귀부터 선형·다항 회귀까지 직접 돌려 보고,
-        3-3 특성 공학과 규제는 개념으로 정리했습니다.
-      </p>
-      <div class="hero__chips">
-        <span class="chip"><i></i>k-최근접 이웃 회귀</span>
-        <span class="chip"><i></i>선형 회귀</span>
-        <span class="chip"><i></i>다항 회귀</span>
-        <span class="chip"><i></i>규제 · 개념 정리</span>
+  <!-- 1 -->
+  <section class="sec" id="week">
+    <h2><span class="no">01</span> 이번 주에 한 일</h2>
+    <p>2-2에서 만든 데이터를 그대로 가져와 회귀 문제로 바꿨습니다. 분류에서는 "어느 무리인가"를 맞혔지만, 회귀에서는 "높이가 몇인가"를 맞힙니다.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>단계</th><th>한 일</th><th class="num">테스트 R²</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>3-1</td><td>부리 길이로 높이 예측, k 조절</td><td class="num">0.9817</td></tr>
+          <tr><td>3-2</td><td>선형 회귀와 2차 다항 회귀로 같은 문제</td><td class="num">0.7235 / 0.7745</td></tr>
+          <tr><td>3-3</td><td>특성 공학과 규제 개념 정리 (실습 없음)</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="cap">3-1과 3-2는 노트북과 같은 <code>random_state=42</code> 분할로 다시 계산해 확인했습니다.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="sec" id="data">
+    <h2><span class="no">02</span> 데이터: 핀치부리새 49마리</h2>
+    <p>작은 부리 35마리와 큰 부리 14마리로 이루어져 있습니다. 길이가 길수록 높이가 <em>낮아지는</em> 역방향 관계라, 교재의 농어 데이터와는 결이 다릅니다.</p>
+
+    <figure class="figure">
+      <div class="chart" id="chart-data" role="img" aria-label="부리 길이와 부리 높이의 산점도. 작은 부리는 길이 8~10.4, 높이 5.6~6.9에, 큰 부리는 길이 12.5~15.5, 높이 2.7~3.3에 분포한다."></div>
+      <figcaption><span class="dot dot--a"></span> 작은 부리 35마리 <span class="dot dot--b"></span> 큰 부리 14마리</figcaption>
+    </figure>
+
+    <p>49마리를 <strong>36마리 훈련 / 13마리 테스트</strong>로 나눴습니다. 테스트 세트는 학습 중에 한 번도 보지 않습니다.</p>
+
+<pre><code>from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    beak_length, beak_height, random_state=42
+)
+# 36마리 / 13마리</code></pre>
+  </section>
+
+  <!-- 3 -->
+  <section class="sec" id="knn">
+    <h2><span class="no">03</span> 3-1 · k-최근접 이웃 회귀</h2>
+    <p>분류와 똑같이 가까운 이웃을 찾고, 타깃만 <strong>다수결이 아니라 평균</strong>으로 정합니다. 정확도 대신 <strong>결정계수 R²</strong>와 <strong>MAE</strong>로 평가합니다.</p>
+
+    <div class="callout">
+      <strong>R² = 1 − (남은 오차²) / (타깃의 흩어짐²)</strong>
+      1에 가까울수록 잘 맞힌 것이고, 0은 그냥 평균으로 찍는 것과 같습니다.
+    </div>
+
+    <figure class="figure">
+      <div class="chart" id="chart-knn" role="img" aria-label="k-최근접 이웃 회귀의 예측 곡선. k가 작으면 훈련 샘플을 따라가고, k가 크면 완만해진다."></div>
+      <div class="control">
+        <label for="kRange">이웃 수 k</label>
+        <input id="kRange" type="range" min="1" max="15" step="1" value="5">
+        <output id="kOut" for="kRange">5</output>
       </div>
-      <div class="hero__stats">
-        <div class="hero__stat"><b>49</b><span>핀치부리새 샘플<br>작은 부리 35 + 큰 부리 14</span></div>
-        <div class="hero__stat"><b>2</b><span>실습 노트북<br>3-1 · 3-2</span></div>
-        <div class="hero__stat"><b>0.980</b><span>테스트 세트 최고 R²<br>k-최근접 이웃, k = 3</span></div>
-        <div class="hero__stat"><b>0.16</b><span>평균 절댓값 오차<br>k = 5, 테스트 세트</span></div>
+      <div class="stats">
+        <div><b id="knnTrain">0.9879</b><span>훈련 R²</span></div>
+        <div><b id="knnTest">0.9817</b><span>테스트 R²</span></div>
+        <div><b id="knnMae">0.1615</b><span>테스트 MAE</span></div>
       </div>
+      <figcaption id="knnNote">k = 5일 때 길이 10.0 → 높이 6.62를 예측합니다.</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>k</th><th class="num">훈련 R²</th><th class="num">테스트 R²</th><th>느낌</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td class="num">0.9898</td><td class="num">0.9677</td><td>너무 복잡, 테스트 점수 최저</td></tr>
+          <tr><td class="mono">3</td><td class="num">0.9874</td><td class="num">0.9800</td><td>테스트 최고</td></tr>
+          <tr><td class="mono">5</td><td class="num">0.9879</td><td class="num">0.9817</td><td>기본값, 가장 안정적</td></tr>
+          <tr><td class="mono">10</td><td class="num">0.9843</td><td class="num">0.9791</td><td>조금 단순해짐</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>과대적합</strong>은 훈련 점수만 높고 테스트가 떨어지는 상태, <strong>과소적합</strong>은 둘 다 낮은 상태입니다. KNN에서는 k를 줄이면 복잡해지고, 늘리면 단순해집니다.</p>
+    <p class="cap">거리가 똑같은 이웃이 생기면 sklearn이 어느 쪽을 고르느냐에 따라 소수점 넷째 자리가 0.0001 정도 달라집니다(예: k = 3 → 0.9874 ↔ 0.9875). 표에는 노트북 값을 적었습니다.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="sec" id="line">
+    <h2><span class="no">04</span> 3-2 · 선형 회귀와 다항 회귀</h2>
+    <p>KNN은 훈련 데이터의 최대 길이(15.5) 밖을 모릅니다. 30.0을 넣으면 어디까지나 <strong>2.8</strong>에 머뭅니다. 직선과 곡선은 범위 밖도 계속 예측합니다.</p>
+
+    <figure class="figure">
+      <div class="chart" id="chart-compare" role="img" aria-label="KNN, 선형 회귀, 2차 다항 회귀의 예측 곡선을 같은 데이터 위에 겹쳐 그린 그림."></div>
+      <figcaption><span class="dot dot--a"></span> KNN (k=3) <span class="dot dot--c"></span> 선형 <span class="dot dot--d"></span> 다항(2차)</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>모델</th><th>식</th><th class="num">길이 30.0</th></tr></thead>
+        <tbody>
+          <tr><td>KNN (k=3)</td><td>이웃 3개의 평균</td><td class="num">2.80</td></tr>
+          <tr><td>선형 회귀</td><td class="mono">−0.6069 × 길이 + 11.746</td><td class="num">−6.46</td></tr>
+          <tr><td>다항 회귀</td><td class="mono">−0.0743 × 길이² + 1.1265 × 길이 + 2.092</td><td class="num">−30.94</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+<pre><code><span class="c"># 2차 다항: 길이를 제곱한 열을 추가한다</span>
+train_poly = np.column_stack((train ** 2, train))
+lr = LinearRegression().fit(train_poly, train_target)
+
+lr.score(test_poly, test_target)   <span class="c"># 0.7745</span></code></pre>
+
+    <div class="callout callout--warn">
+      <strong>왜 높이가 음수로 나올까.</strong>
+      우리 데이터는 길이가 길수록 높이가 낮아지는 역방향입니다. 직선을 오른쪽으로 늘리면 계속 내려가서 30.0에서 음수가 됩니다.
+      교재의 농어는 반대로 길이와 무게가 함께 커져서, 같은 코드로 50cm 농어를 1,242g으로 예측했습니다.
     </div>
   </section>
 
-  <div class="page">
-    <div class="layout">
-      <aside class="toc" aria-label="목차">
-        <p class="toc__label">Contents</p>
-        <ol>
-          <li><a href="#overview">학습 지도</a></li>
-          <li><a href="#data">데이터</a></li>
-          <li><a href="#knn">3-1 KNN 회귀</a></li>
-          <li><a href="#linear">3-2 선형·다항</a></li>
-          <li><a href="#features">3-3 개념 정리</a></li>
-          <li><a href="#compare">교재 vs 우리</a></li>
-          <li><a href="#glossary">개념 사전</a></li>
-          <li><a href="#code">코드</a></li>
-          <li><a href="#quiz">확인 문제</a></li>
-          <li><a href="#notes">필기 · 자료</a></li>
-        </ol>
-      </aside>
+  <!-- 5 -->
+  <section class="sec" id="reg">
+    <h2><span class="no">05</span> 3-3 · 특성 공학과 규제</h2>
+    <p>3-3은 코드 실습 없이 개념만 정리했습니다. 아래 수치는 교재의 농어 데이터 기준입니다.</p>
 
-      <div class="main">
+    <h3>특성을 늘리면 표현력이 커진다</h3>
+    <ul>
+      <li><strong>다중 회귀</strong> — 특성이 여러 개인 선형 회귀. 특성 1개는 직선, 2개는 평면, 그 이상은 초평면입니다.</li>
+      <li><strong>특성 공학</strong> — 기존 특성을 제곱하거나 곱해 새 특성을 만드는 일. 모델은 그대로 선형 회귀입니다.</li>
+      <li><strong>PolynomialFeatures</strong> — 조합을 자동으로 만들어 줍니다. 특성 3개 기준 2차는 9개, 5차는 55개.</li>
+      <li><strong>StandardScaler</strong> — 규제를 공정하게 걸려면 스케일을 맞춰야 합니다. 훈련 세트의 평균·표준편차로 테스트 세트까지 변환합니다.</li>
+    </ul>
 
-        <!-- ============ 01 ============ -->
-        <section class="section reveal" id="overview">
-          <div class="section__head">
-            <p class="section__num">01 — Overview</p>
-            <h2>이번 주, 무엇을 공부했나</h2>
-            <p>2-2에서 만든 데이터를 그대로 가져와 3-1과 3-2를 실습했습니다. 3-3은 실습 대신 개념 정리로 마무리했습니다.</p>
-          </div>
-
-          <div class="roadmap">
-            <article class="step">
-              <h4>2-2 복습 · 데이터 전처리</h4>
-              <p>부리 길이·높이 두 특성으로 35마리와 14마리를 분류. <code class="mono">stratify</code>로 비율을 맞추고 표준화까지 적용했습니다.</p>
-              <span class="step__tag">분류 · 정확도 1.0</span>
-            </article>
-            <article class="step">
-              <h4>3-1 실습 · KNN 회귀</h4>
-              <p>부리 길이 하나로 부리 높이를 예측. 결정계수와 MAE를 구하고, k를 바꿔 모델 복잡도를 조절했습니다.</p>
-              <span class="step__tag">회귀 · R² 0.98</span>
-            </article>
-            <article class="step">
-              <h4>3-2 실습 · 선형·다항 회귀</h4>
-              <p>KNN이 훈련 범위 밖을 예측하지 못하는 문제를 확인하고, 직선과 2차 곡선으로 같은 문제를 다시 풀었습니다.</p>
-              <span class="step__tag">회귀 · 외삽</span>
-            </article>
-            <article class="step step--muted">
-              <h4>3-3 정리 · 특성 공학과 규제</h4>
-              <p>다중 회귀, PolynomialFeatures, StandardScaler, 릿지·라쏘와 alpha를 교재 수치와 함께 정리만 했습니다.</p>
-              <span class="step__tag">개념 정리 · 실습 없음</span>
-            </article>
-          </div>
-
-          <div class="note" style="margin-top: 20px;">
-            <strong>왜 데이터를 바꿨나.</strong> 핀치부리새는 2-2에서 이미 다뤄 본 데이터입니다. 같은 데이터를
-            분류에서 회귀로 바꿔 쓰면, 문제 정의가 달라질 때 모델과 평가 지표가 어떻게 바뀌는지를 한 흐름으로 볼 수 있습니다.
-          </div>
-        </section>
-
-        <!-- ============ 02 ============ -->
-        <section class="section reveal" id="data">
-          <div class="section__head">
-            <p class="section__num">02 — Dataset</p>
-            <h2>데이터: 핀치부리새 49마리</h2>
-            <p>부리 길이 하나로 부리 높이를 예측합니다. 2-2에서는 두 특성으로 분류했지만, 3장에서는 길이만 남겨 회귀 문제로 바꿨습니다.</p>
-          </div>
-
-          <div class="grid grid--2" style="align-items: stretch;">
-            <div class="card card--tint">
-              <p class="kicker">Dataset at a glance</p>
-              <h3 class="sub">같은 새, 다른 질문</h3>
-              <p>49마리는 부리 길이를 기준으로 두 무리로 나뉩니다. 작은 부리 35마리는 길이 8.2–10.4, 큰 부리 14마리는 12.5–15.5 구간에 몰려 있습니다.</p>
-              <div class="metrics" style="grid-template-columns: 1fr 1fr;">
-                <div class="metric"><span>샘플</span><b>49<small>마리</small></b></div>
-                <div class="metric"><span>훈련 / 테스트</span><b>36<small> / 13</small></b></div>
-                <div class="metric"><span>특성</span><b>1<small>개 · 길이</small></b></div>
-                <div class="metric"><span>타깃</span><b>높이<small> · 연속값</small></b></div>
-              </div>
-              <p class="tbl-note" style="margin-top: 14px;">측정 단위는 노트북에 따로 적혀 있지 않아, 수치 자체만 비교했습니다.</p>
-            </div>
-
-            <div class="chart-card">
-              <div class="chart-card__head">
-                <div>
-                  <h4>부리 길이에 따른 부리 높이</h4>
-                  <p>두 무리가 뚜렷하게 갈라져 있습니다.</p>
-                </div>
-                <span class="badge">n = 49</span>
-              </div>
-              <div class="chart" id="chart-data" role="img" aria-label="부리 길이와 부리 높이의 산점도. 작은 부리 35마리는 길이 8~10.4, 높이 5.6~6.9 구간에, 큰 부리 14마리는 길이 12.5~15.5, 높이 2.7~3.3 구간에 분포한다."></div>
-              <div class="legend">
-                <span><i style="background:#0f6b52"></i>작은 부리 35마리</span>
-                <span><i style="background:#b45309"></i>큰 부리 14마리</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid--2" style="margin-top: 18px; align-items: start;">
-            <div>
-              <div class="table-wrap">
-                <table>
-                  <caption>데이터 미리보기 (앞 8행)</caption>
-                  <thead>
-                    <tr><th class="num">#</th><th class="num">부리 길이</th><th class="num">부리 높이</th><th>무리</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td class="num">1</td><td class="num">8.2</td><td class="num">5.8</td><td>작은 부리</td></tr>
-                    <tr><td class="num">2</td><td class="num">8.5</td><td class="num">6.1</td><td>작은 부리</td></tr>
-                    <tr><td class="num">3</td><td class="num">8.7</td><td class="num">5.9</td><td>작은 부리</td></tr>
-                    <tr><td class="num">4</td><td class="num">9.0</td><td class="num">6.3</td><td>작은 부리</td></tr>
-                    <tr><td class="num">5</td><td class="num">9.1</td><td class="num">6.0</td><td>작은 부리</td></tr>
-                    <tr><td class="num">36</td><td class="num">12.5</td><td class="num">3.2</td><td>큰 부리</td></tr>
-                    <tr><td class="num">37</td><td class="num">13.0</td><td class="num">3.0</td><td>큰 부리</td></tr>
-                    <tr><td class="num">38</td><td class="num">13.4</td><td class="num">3.3</td><td>큰 부리</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="card card--flat">
-              <p class="kicker">Recap · 2-2</p>
-              <h3 class="sub">분류에서는 이렇게 썼습니다</h3>
-              <ul style="margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.9; color: var(--ink-2);">
-                <li><code class="mono">column_stack</code>으로 두 특성을 묶어 (49, 2) 배열을 만들고, 타깃은 <code class="mono">ones(35)</code> + <code class="mono">zeros(14)</code>로 구성</li>
-                <li><code class="mono">stratify=bird_target</code>으로 테스트 세트에도 두 클래스가 고르게 들어가도록 분할</li>
-                <li>길이와 높이의 스케일이 달라 표준화 후 학습. 11.5 / 4.0 샘플은 클래스 0으로 예측</li>
-              </ul>
-              <div class="metrics" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
-                <div class="metric"><span>분류 정확도</span><b>1.000</b></div>
-                <div class="metric"><span>표준화 평균</span><b>10.71<small> / 5.36</small></b></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ 03 ============ -->
-        <section class="section reveal" id="knn">
-          <div class="section__head">
-            <p class="section__num">03 — 3-1 Practice</p>
-            <h2>k-최근접 이웃 회귀</h2>
-            <p>가장 가까운 k마리의 부리 높이를 평균합니다. 분류와 거의 같고, 타깃을 다수결이 아니라 평균으로 정한다는 점만 다릅니다.</p>
-          </div>
-
-          <div class="grid grid--3">
-            <article class="concept concept--accent">
-              <div class="concept__ico">k</div>
-              <h4>이웃을 찾고, 평균한다</h4>
-              <p>예측하려는 샘플에서 가장 가까운 k개를 고르고, 그 샘플들의 타깃값을 평균해 예측값으로 씁니다.</p>
-              <p class="ex">k = 3 → (6.4 + 6.3 + 6.2) / 3</p>
-            </article>
-            <article class="concept">
-              <div class="concept__ico">R²</div>
-              <h4>결정계수로 평가한다</h4>
-              <p>회귀에서는 정확도를 셀 수 없습니다. 대신 타깃의 분산 대비 설명된 분산을 보는 결정계수를 씁니다.</p>
-              <p class="ex">1에 가까울수록 좋고, 0은 평균 수준</p>
-            </article>
-            <article class="concept">
-              <div class="concept__ico">MAE</div>
-              <h4>오차를 크기로 읽는다</h4>
-              <p>평균 절댓값 오차는 타깃과 예측의 차이를 절댓값으로 평균합니다. 숫자가 그대로 오차 크기가 됩니다.</p>
-              <p class="ex">0.16 → 평균 0.16만큼 틀림</p>
-            </article>
-          </div>
-
-          <div class="formula" style="margin-top: 18px;">
-            <div>R² = 1 − <span class="frac"><span>Σ (타깃 − 예측)²</span><span>Σ (타깃 − 평균)²</span></span></div>
-            <div class="dim" style="font-size: 12px;">분자 → 남은 오차 · 분모 → 타깃 자체의 흩어짐</div>
-          </div>
-          <p class="formula-caption">예측이 타깃과 똑같아지면 분자가 0이라 R² = 1. 분모보다 분자가 커지면 음수도 나올 수 있습니다.</p>
-
-          <div class="chart-card" style="margin-top: 26px;">
-            <div class="chart-card__head">
-              <div>
-                <h4>k를 바꾸면 예측 곡선이 어떻게 변할까</h4>
-                <p>슬라이더를 움직이면 이웃 수 k와 예측 지점이 바뀝니다. 점수는 브라우저에서 직접 계산합니다.</p>
-              </div>
-              <span class="badge badge--accent">Interactive</span>
-            </div>
-            <div class="chart" id="chart-knn" role="img" aria-label="k-최근접 이웃 회귀 예측 곡선. k가 커질수록 곡선이 매끄러워지고, k가 작을수록 각 훈련 샘플을 따라간다."></div>
-            <div class="legend">
-              <span><i style="background:#0f6b52"></i>훈련 세트</span>
-              <span><i style="background:#fff;border:1.8px solid #b45309"></i>테스트 세트</span>
-              <span><i style="background:#b45309;border-radius:2px"></i>선택된 이웃</span>
-              <span><i class="sq" style="background:#0f6b52"></i>KNN 예측</span>
-            </div>
-            <div class="controls">
-              <div class="control">
-                <label for="kRange">이웃 수 k</label>
-                <input id="kRange" type="range" min="1" max="15" step="1" value="5">
-                <output id="kOut" for="kRange">5</output>
-              </div>
-              <div class="control">
-                <label for="probeRange">예측 지점</label>
-                <input id="probeRange" type="range" min="8" max="16" step="0.1" value="10">
-                <output id="probeOut" for="probeRange">10.0</output>
-              </div>
-            </div>
-            <div class="metrics">
-              <div class="metric"><span>훈련 R²</span><b id="knnTrain">0.9879</b></div>
-              <div class="metric"><span>테스트 R²</span><b id="knnTest">0.9817</b></div>
-              <div class="metric"><span>테스트 MAE</span><b id="knnMae">0.1615</b></div>
-            </div>
-            <p class="tbl-note" id="knnPredNote">k = 5, 길이 10.0 → 예측 높이 6.62</p>
-            <p class="tbl-note">k = 3처럼 거리가 똑같은 이웃이 생기면 sklearn이 어느 쪽을 고르느냐에 따라 소수점 넷째 자리가 바뀝니다(0.9874 ↔ 0.9875). 표에는 노트북 출력값을 그대로 적었습니다.</p>
-          </div>
-
-          <div class="grid grid--2" style="margin-top: 22px; align-items: start;">
-            <div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>k</th><th class="num">훈련 R²</th><th class="num">테스트 R²</th><th>해석</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td class="mono">1</td><td class="num">0.9898</td><td class="num">0.9677</td><td>가장 복잡, 테스트 점수는 가장 낮음</td></tr>
-                    <tr><td class="mono">3</td><td class="num">0.9874</td><td class="num">0.9800</td><td>테스트 최고</td></tr>
-                    <tr><td class="mono">5</td><td class="num">0.9879</td><td class="num">0.9817</td><td>기본값, 안정적</td></tr>
-                    <tr><td class="mono">10</td><td class="num">0.9843</td><td class="num">0.9791</td><td>조금 단순해짐</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="tbl-note">노트북과 동일한 36 / 13 분할에서 다시 계산한 값입니다.</p>
-            </div>
-
-            <div class="card card--flat">
-              <p class="kicker">Reading</p>
-              <h3 class="sub">k는 모델의 복잡도 손잡이</h3>
-              <p>k가 작으면 가까운 몇 마리에만 반응해 훈련 세트의 국지적인 패턴을 그대로 따라갑니다. k가 크면 멀리 있는 샘플까지 평균에 넣어 곡선이 완만해집니다.</p>
-              <p>교재에서는 k = 5일 때 테스트 점수가 훈련 점수보다 높아 <strong>과소적합</strong> 신호가 보였습니다. 우리 데이터에서는 k = 5에서도 훈련 점수가 더 높아, 그 신호가 나타나지 않았습니다.</p>
-              <div class="note note--amber" style="margin-top: 14px;">
-                <strong>관찰.</strong> k를 1에서 10까지 바꿔도 테스트 R²가 0.968–0.982 사이에서만 움직입니다.
-                모델 복잡도보다 <em>어떤 특성을 넣었는지</em>가 성능을 더 크게 좌우한다는 뜻입니다.
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid--2" style="margin-top: 18px;">
-            <div class="card card--flat">
-              <p class="kicker">Overfitting</p>
-              <h3 class="sub">과대적합</h3>
-              <p>훈련 세트에는 아주 잘 맞지만 테스트 세트에서는 점수가 크게 떨어지는 상태. 훈련 데이터의 우연한 잡음까지 외운 경우입니다.</p>
-              <div class="chart" id="chart-over" role="img" aria-label="과대적합 개념도. 훈련 샘플을 모두 지나가는 구불구불한 곡선."></div>
-              <p class="tbl-note">해결: 모델을 단순하게. KNN에서는 k를 늘립니다.</p>
-            </div>
-            <div class="card card--flat">
-              <p class="kicker">Underfitting</p>
-              <h3 class="sub">과소적합</h3>
-              <p>모델이 너무 단순해 훈련 세트조차 제대로 설명하지 못하는 상태. 훈련 점수와 테스트 점수가 모두 낮게 나옵니다.</p>
-              <div class="chart" id="chart-under" role="img" aria-label="과소적합 개념도. 데이터의 굴곡을 무시하는 직선."></div>
-              <p class="tbl-note">해결: 모델을 복잡하게. KNN에서는 k를 줄입니다.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ 04 ============ -->
-        <section class="section reveal" id="linear">
-          <div class="section__head">
-            <p class="section__num">04 — 3-2 Practice</p>
-            <h2>KNN의 한계, 선형 회귀와 다항 회귀</h2>
-            <p>훈련 데이터 범위를 벗어나면 KNN은 더 이상 커지지 않습니다. 직선을 학습하면 범위 밖도 예측할 수 있지만, 이번 데이터에서는 선이 아래로 내려갑니다.</p>
-          </div>
-
-          <div class="grid grid--3">
-            <article class="concept concept--amber">
-              <div class="concept__ico">!</div>
-              <h4>30.0을 예측하면 2.8</h4>
-              <p>훈련 데이터의 최대 길이는 15.5입니다. 그보다 큰 값은 모두 가장 가까운 이웃의 평균으로 수렴합니다.</p>
-              <p class="ex">knn.predict([[30.0]]) → [2.8]</p>
-            </article>
-            <article class="concept">
-              <div class="concept__ico">y=ax+b</div>
-              <h4>직선은 범위 밖도 말한다</h4>
-              <p>선형 회귀는 기울기와 절편을 학습해, 훈련 범위 밖도 같은 기울기로 계속 예측합니다.</p>
-              <p class="ex">coef = -0.6069, intercept = 11.746</p>
-            </article>
-            <article class="concept concept--violet">
-              <div class="concept__ico">x²</div>
-              <h4>곡선은 제곱 항으로</h4>
-              <p>길이를 제곱한 열을 추가해 2차 방정식을 학습합니다. 여전히 선형 회귀 클래스를 씁니다.</p>
-              <p class="ex">[길이², 길이] → LinearRegression</p>
-            </article>
-          </div>
-
-          <div class="chart-card" style="margin-top: 22px;">
-            <div class="chart-card__head">
-              <div>
-                <h4>세 모델의 예측을 겹쳐 보기</h4>
-                <p>세로 점선은 훈련 데이터의 끝(15.5), 오른쪽 끝은 30.0 지점입니다. 모델을 바꿔 보세요.</p>
-              </div>
-              <div class="seg" role="group" aria-label="모델 선택">
-                <button type="button" data-model="knn" aria-pressed="true">KNN (k=3)</button>
-                <button type="button" data-model="lin" aria-pressed="false">선형 회귀</button>
-                <button type="button" data-model="poly" aria-pressed="false">다항 회귀</button>
-              </div>
-            </div>
-            <div class="chart" id="chart-model" role="img" aria-label="KNN, 선형 회귀, 다항 회귀의 예측 곡선 비교. 30 지점에서 KNN은 2.8, 선형 회귀는 -6.46, 다항 회귀는 -30.94를 예측한다."></div>
-            <div class="legend">
-              <span><i style="background:#0f6b52"></i>훈련 데이터</span>
-              <span><i class="sq" style="background:#5b4b8a"></i>훈련 범위 경계</span>
-              <span><i style="background:#14171c;border-radius:2px"></i>예측 지점</span>
-            </div>
-            <div class="metrics">
-              <div class="metric"><span>훈련 R²</span><b id="modelTrain">0.9875</b></div>
-              <div class="metric"><span>테스트 R²</span><b id="modelTest">0.9800</b></div>
-              <div class="metric"><span>30.0 예측</span><b id="modelPred">2.80</b></div>
-            </div>
-            <p class="tbl-note" id="modelNote">KNN은 15.5 밖을 알지 못해 마지막 이웃들의 평균에 머뭅니다.</p>
-          </div>
-
-          <div class="grid grid--2" style="margin-top: 22px; align-items: start;">
-            <div class="card card--flat">
-              <p class="kicker">Parameters</p>
-              <h3 class="sub">각 모델이 찾은 값</h3>
-              <div class="table-wrap" style="margin-top: 12px;">
-                <table>
-                  <thead><tr><th>모델</th><th>식</th><th class="num">30.0 예측</th></tr></thead>
-                  <tbody>
-                    <tr><td>KNN (k=3)</td><td class="mono">이웃 3개의 평균</td><td class="num">2.80</td></tr>
-                    <tr><td>선형 회귀</td><td class="mono">−0.6069 × 길이 + 11.746</td><td class="num">−6.46</td></tr>
-                    <tr><td>다항 회귀</td><td class="mono">−0.0743 × 길이² + 1.1265 × 길이 + 2.092</td><td class="num">−30.94</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="tbl-note">다항 회귀의 계수 순서는 입력 <code class="mono">[길이², 길이]</code> 기준입니다.</p>
-            </div>
-            <div class="card card--tint">
-              <p class="kicker">Why negative?</p>
-              <h3 class="sub">왜 높이가 음수로 나올까</h3>
-              <p>우리 데이터는 <strong>길이가 길수록 부리 높이가 낮아지는</strong> 역방향 경향을 보입니다. 큰 부리 무리의 높이가 2.7–3.3으로 작은 부리 무리(5.6–6.9)보다 낮기 때문입니다.</p>
-              <p>그래서 직선을 오른쪽으로 연장하면 높이가 계속 내려가고, 30.0에서는 물리적으로 불가능한 음수가 됩니다.</p>
-              <p>교재의 농어 데이터는 반대로 길이와 무게가 함께 커져서, 같은 코드로 50cm 농어의 무게를 1,242g으로 예측했습니다.</p>
-              <div class="note note--amber" style="margin-top: 14px;">
-                <strong>핵심.</strong> 모델의 예측이 말이 되는지는 숫자 하나가 아니라 <em>데이터의 범위와 방향</em>을 함께 봐야 판단할 수 있습니다.
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ 05 ============ -->
-        <section class="section reveal" id="features">
-          <div class="section__head">
-            <p class="section__num">05 — 3-3 Concept</p>
-            <h2>특성 공학과 규제</h2>
-            <p>3-3은 코드 실습 없이 개념만 정리했습니다. 아래 수치는 교재의 농어 데이터 기준 결과입니다.</p>
-            <span class="badge badge--violet">실습 없음 · 개념 정리</span>
-          </div>
-
-          <div class="grid grid--3">
-            <article class="concept">
-              <div class="concept__ico">3D</div>
-              <h4>다중 회귀</h4>
-              <p>특성이 여러 개인 선형 회귀. 특성 1개는 직선, 2개는 평면, 그 이상은 고차원 초평면을 학습합니다.</p>
-              <p class="ex">무게 = a·길이 + b·높이 + c·두께 + d</p>
-            </article>
-            <article class="concept">
-              <div class="concept__ico">FE</div>
-              <h4>특성 공학</h4>
-              <p>기존 특성을 제곱하거나 서로 곱해 새로운 특성을 만들어내는 작업. 모델은 같은 선형 회귀지만 표현력이 달라집니다.</p>
-              <p class="ex">길이 × 높이, 길이², 두께² …</p>
-            </article>
-            <article class="concept">
-              <div class="concept__ico">PF</div>
-              <h4>PolynomialFeatures</h4>
-              <p>특성 조합을 자동으로 만들어 주는 변환기. <code class="mono">fit</code>으로 조합을 준비하고 <code class="mono">transform</code>으로 변환합니다.</p>
-              <p class="ex">특성 3개 · 2차 → 9개<br>5차 → 55개</p>
-            </article>
-            <article class="concept">
-              <div class="concept__ico">SS</div>
-              <h4>StandardScaler</h4>
-              <p>규제를 공정하게 걸려면 특성의 스케일을 맞춰야 합니다. 훈련 세트의 평균·표준편차로 테스트 세트까지 변환합니다.</p>
-              <p class="ex">z = (x − mean) / std</p>
-            </article>
-            <article class="concept concept--accent">
-              <div class="concept__ico">λ</div>
-              <h4>규제</h4>
-              <p>모델이 훈련 세트를 과도하게 외우지 못하도록 계수 크기를 줄입니다. 과대적합을 누르고 일반화를 돕습니다.</p>
-              <p class="ex">55개 특성 · 42개 샘플 → 과대적합 위험</p>
-            </article>
-            <article class="concept concept--amber">
-              <div class="concept__ico">R / L</div>
-              <h4>릿지와 라쏘</h4>
-              <p>릿지는 계수 제곱(L2)을, 라쏘는 절댓값(L1)을 규제합니다. 라쏘는 계수를 0으로 만들어 특성 선택 효과도 냅니다.</p>
-              <p class="ex">릿지 55개 중 0개 제거<br>라쏘 α=10 → 40개가 0</p>
-            </article>
-          </div>
-
-          <div class="grid grid--2" style="margin-top: 18px; align-items: start;">
-            <div class="card card--flat">
-              <p class="kicker">Hyperparameter</p>
-              <h3 class="sub">alpha는 사람이 정한다</h3>
-              <p>alpha는 모델이 학습하는 값이 아니라, 우리가 미리 지정하는 하이퍼파라미터입니다. 크면 규제가 세져 계수가 더 줄고 과소적합 쪽으로, 작으면 선형 회귀에 가까워져 과대적합 쪽으로 갑니다.</p>
-              <p>적절한 값은 훈련 점수와 테스트 점수의 그래프를 그려, 두 선이 가장 가깝고 테스트 점수가 가장 높은 지점에서 고릅니다. 교재에서는 릿지 0.1, 라쏘 10이 선택되었습니다.</p>
-            </div>
-            <div class="chart-card">
-              <div class="chart-card__head">
-                <div>
-                  <h4>alpha에 따른 R² 변화 (개념도)</h4>
-                  <p>왼쪽은 과대적합, 오른쪽은 과소적합.</p>
-                </div>
-              </div>
-              <div class="chart" id="chart-alpha" role="img" aria-label="alpha가 커질수록 훈련 점수는 조금 낮아지고 테스트 점수는 올라갔다가 다시 낮아지는 개념도."></div>
-              <div class="legend">
-                <span><i class="sq" style="background:#0f6b52"></i>훈련 R²</span>
-                <span><i class="sq" style="background:#b45309"></i>테스트 R²</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="table-wrap" style="margin-top: 18px;">
-            <table>
-              <caption>교재 농어 데이터 기준 · 3-3 결과</caption>
-              <thead>
-                <tr><th>모델</th><th class="num">훈련 R²</th><th class="num">테스트 R²</th><th>메모</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>다중 회귀 · 2차 (9개 특성)</td><td class="num">0.9903</td><td class="num">0.9715</td><td>길이·높이·두께 + 제곱·곱 항</td></tr>
-                <tr><td>다중 회귀 · 5차 (55개 특성)</td><td class="num">1.0000</td><td class="num">−144.41</td><td>훈련 세트를 외워 버린 전형적인 과대적합</td></tr>
-                <tr><td>릿지 (alpha = 1)</td><td class="num">0.9896</td><td class="num">0.9791</td><td>규제로 테스트 점수 정상화</td></tr>
-                <tr><td>릿지 (alpha = 0.1)</td><td class="num">0.9904</td><td class="num">0.9828</td><td>교재가 고른 최종 모델</td></tr>
-                <tr><td>라쏘 (alpha = 10)</td><td class="num">0.9888</td><td class="num">0.9824</td><td>55개 중 40개 계수가 0</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="tbl-note">3-3은 실습하지 않아, 위 수치는 교재 본문에 실린 결과를 그대로 옮겨 적은 것입니다.</p>
-
-          <div class="note" style="margin-top: 20px;">
-            <strong>다음에 실습한다면.</strong> 판다스로 농어 CSV를 읽고 → <code class="mono">PolynomialFeatures(degree=5)</code>로
-            55개 특성을 만들고 → <code class="mono">StandardScaler</code>로 스케일을 맞춘 뒤 → 릿지·라쏘의 alpha를
-            로그 스케일로 훑는 순서. 3-3의 코드 흐름은 이 네 단계로 요약됩니다.
-          </div>
-        </section>
-
-        <!-- ============ 06 ============ -->
-        <section class="section reveal" id="compare">
-          <div class="section__head">
-            <p class="section__num">06 — Compare</p>
-            <h2>교재의 농어 vs 우리의 핀치부리새</h2>
-            <p>같은 코드, 다른 데이터. 숫자가 왜 다른지가 이번 실습의 핵심입니다.</p>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <caption>R² 점수 비교 (훈련 / 테스트)</caption>
-              <thead>
-                <tr><th>모델</th><th class="num">교재 · 농어</th><th class="num">우리 · 핀치부리새</th><th>차이</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>KNN 회귀 · k = 5</td><td class="num">0.9699 / 0.9928</td><td class="num">0.9879 / 0.9817</td><td>교재는 테스트가 더 높아 과소적합 신호</td></tr>
-                <tr><td>KNN 회귀 · k = 3</td><td class="num">0.9805 / 0.9746</td><td class="num">0.9874 / 0.9800</td><td>둘 다 k를 줄여 균형을 맞춤</td></tr>
-                <tr><td>선형 회귀</td><td class="num">0.9398 / 0.8248</td><td class="num">0.8297 / 0.7235</td><td>우리 데이터가 직선에 더 안 맞음</td></tr>
-                <tr><td>다항 회귀 · 2차</td><td class="num">0.9707 / 0.9776</td><td class="num">0.8551 / 0.7745</td><td>곡선으로도 개선 폭이 작음</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="grid grid--3" style="margin-top: 18px;">
-            <div class="insight">
-              <span class="insight__n">1</span>
-              <div>
-                <h4>교재는 단조 증가</h4>
-                <p>농어는 길이가 길수록 무게가 커집니다. 직선 하나로도 방향이 맞기 때문에 선형 회귀의 R²가 0.82까지 나옵니다.</p>
-              </div>
-            </div>
-            <div class="insight">
-              <span class="insight__n">2</span>
-              <div>
-                <h4>우리는 두 덩어리</h4>
-                <p>8–10 구간과 12–15 구간이 끊겨 있고, 큰 부리 쪽 높이가 오히려 낮습니다. 길이 하나로는 높이를 설명하기 어렵습니다.</p>
-              </div>
-            </div>
-            <div class="insight">
-              <span class="insight__n">3</span>
-              <div>
-                <h4>그래서 특성의 문제</h4>
-                <p>k를 바꿔도 점수 변화가 작습니다. 모델 복잡도보다 어떤 특성을 넣는지가 중요하다는 것을 데이터가 보여 줍니다.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ 07 ============ -->
-        <section class="section reveal" id="glossary">
-          <div class="section__head">
-            <p class="section__num">07 — Glossary</p>
-            <h2>개념 사전</h2>
-            <p>이번 장에서 계속 나온 말들만 한 줄로 정리했습니다.</p>
-          </div>
-
-          <div class="grid grid--3">
-            <article class="concept"><h4>회귀 (regression)</h4><p>임의의 수치를 예측하는 지도 학습. 타깃이 클래스가 아니라 연속값입니다.</p></article>
-            <article class="concept"><h4>분류 (classification)</h4><p>샘플을 몇 개의 클래스 중 하나로 나누는 문제. 2-2의 핀치부리새 분류가 여기에 해당합니다.</p></article>
-            <article class="concept"><h4>k-최근접 이웃</h4><p>가장 가까운 k개 샘플을 참고하는 알고리즘. 분류는 다수결, 회귀는 평균을 씁니다.</p></article>
-            <article class="concept"><h4>결정계수 R²</h4><p>회귀 성능 지표. 1에 가까울수록 좋고, 0은 평균 수준, 음수면 평균보다 못합니다.</p></article>
-            <article class="concept"><h4>MAE</h4><p>평균 절댓값 오차. 예측이 평균적으로 얼마나 틀렸는지를 타깃과 같은 단위로 보여 줍니다.</p></article>
-            <article class="concept"><h4>과대적합</h4><p>훈련 세트에만 지나치게 잘 맞아, 새 데이터에서 성능이 떨어지는 상태.</p></article>
-            <article class="concept"><h4>과소적합</h4><p>모델이 너무 단순해 훈련 세트조차 충분히 설명하지 못하는 상태.</p></article>
-            <article class="concept"><h4>모델 파라미터</h4><p>모델이 데이터에서 학습한 값. 선형 회귀의 <code class="mono">coef_</code>, <code class="mono">intercept_</code>가 대표적입니다.</p></article>
-            <article class="concept"><h4>하이퍼파라미터</h4><p>학습되지 않고 사람이 지정하는 값. KNN의 k, 릿지·라쏘의 alpha.</p></article>
-            <article class="concept"><h4>다중 회귀</h4><p>특성이 여러 개인 선형 회귀. 특성이 늘수록 표현력이 커집니다.</p></article>
-            <article class="concept"><h4>특성 공학</h4><p>기존 특성을 조합해 새로운 특성을 만드는 작업. 제곱·곱·비율 등이 있습니다.</p></article>
-            <article class="concept"><h4>규제</h4><p>계수 크기를 줄여 과대적합을 억제하는 장치. 릿지(L2)와 라쏘(L1)가 있습니다.</p></article>
-          </div>
-        </section>
-
-        <!-- ============ 08 ============ -->
-        <section class="section reveal" id="code">
-          <div class="section__head">
-            <p class="section__num">08 — Code</p>
-            <h2>실습 코드 다시 보기</h2>
-            <p>노트북에서 핵심만 추린 코드입니다. 오른쪽 위 버튼으로 복사할 수 있습니다.</p>
-          </div>
-
-          <div class="tabs">
-            <div class="tablist" role="tablist" aria-label="코드 예제">
-              <button role="tab" id="tab-31" aria-controls="panel-31" aria-selected="true">3-1 · KNN 회귀</button>
-              <button role="tab" id="tab-32" aria-controls="panel-32" aria-selected="false">3-2 · 선형·다항</button>
-              <button role="tab" id="tab-22" aria-controls="panel-22" aria-selected="false">2-2 · 표준화 복습</button>
-            </div>
-
-            <div class="code tabpanel" id="panel-31" role="tabpanel" aria-labelledby="tab-31">
-              <div class="code__bar">
-                <span class="code__dots"><i></i><i></i><i></i></span>
-                <span class="code__name">3-1_knn_regression.py</span>
-                <button class="copy" type="button">copy</button>
-              </div>
-              <pre><code><span class="cm"># 1. 부리 길이 → 부리 높이 (49마리)</span>
-import numpy as np
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
-<span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> KNeighborsRegressor
-<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> mean_absolute_error
-
-beak_length = np.array([8.2, 8.5, 8.7, 9.0, 9.1, 9.3, <span class="cm"># … 49개</span>
-                        12.5, 13.0, 13.4, 13.8, 14.0, 14.3, 14.5, 14.8, 15.0, 15.3])
-beak_height = np.array([5.8, 6.1, 5.9, 6.3, 6.0, 6.5, <span class="cm"># … 49개</span>
-                        3.2, 3.0, 3.3, 2.9, 3.1, 2.8, 3.2, 2.7, 3.0, 2.9])
-
-<span class="cm"># 2. 훈련 36 / 테스트 13</span>
-train_input, test_input, train_target, test_target = train_test_split(
-    beak_length, beak_height, random_state=<span class="nm">42</span>)
-
-<span class="cm"># 3. 사이킷런은 2차원 입력을 요구</span>
-train_input = train_input.reshape(-<span class="nm">1</span>, <span class="nm">1</span>)
-test_input = test_input.reshape(-<span class="nm">1</span>, <span class="nm">1</span>)
-
-<span class="cm"># 4. k=5 이웃의 타깃 평균으로 예측</span>
-knr = KNeighborsRegressor()
-knr.fit(train_input, train_target)
-<span class="fn">print</span>(knr.score(test_input, test_target))                     <span class="cm"># 0.9817</span>
-<span class="fn">print</span>(mean_absolute_error(test_target, knr.predict(test_input)))  <span class="cm"># 0.1615</span>
-
-<span class="cm"># 5. k를 줄이면 모델이 복잡해진다</span>
-knr.n_neighbors = <span class="nm">3</span>
-knr.fit(train_input, train_target)
-<span class="fn">print</span>(knr.score(train_input, train_target))                  <span class="cm"># 0.9874</span>
-<span class="fn">print</span>(knr.score(test_input, test_target))                    <span class="cm"># 0.9800</span></code></pre>
-            </div>
-
-            <div class="code tabpanel" id="panel-32" role="tabpanel" aria-labelledby="tab-32" hidden>
-              <div class="code__bar">
-                <span class="code__dots"><i></i><i></i><i></i></span>
-                <span class="code__name">3-2_linear_polynomial.py</span>
-                <button class="copy" type="button">copy</button>
-              </div>
-              <pre><code><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LinearRegression
-
-<span class="cm"># KNN은 훈련 범위(최대 15.5) 밖을 모른다</span>
-knr = KNeighborsRegressor(n_neighbors=<span class="nm">3</span>).fit(train_input, train_target)
-<span class="fn">print</span>(knr.predict([[<span class="nm">30.0</span>]]))        <span class="cm"># [2.8]  ← 마지막 이웃 평균</span>
-
-<span class="cm"># 선형 회귀: 직선 하나</span>
-lr = LinearRegression().fit(train_input, train_target)
-<span class="fn">print</span>(lr.predict([[<span class="nm">30.0</span>]]))        <span class="cm"># [-6.46]</span>
-<span class="fn">print</span>(lr.coef_, lr.intercept_)    <span class="cm"># [-0.6069] 11.7460</span>
-<span class="fn">print</span>(lr.score(train_input, train_target), lr.score(test_input, test_target))
-<span class="cm"># 0.8297 0.7235</span>
-
-<span class="cm"># 다항 회귀: 길이² 열을 추가해 2차 곡선을 학습</span>
-train_poly = np.column_stack((train_input ** <span class="nm">2</span>, train_input))
-test_poly = np.column_stack((test_input ** <span class="nm">2</span>, test_input))
-
-lr = LinearRegression().fit(train_poly, train_target)
-<span class="fn">print</span>(lr.predict([[<span class="nm">30</span>**<span class="nm">2</span>, <span class="nm">30</span>]]))  <span class="cm"># [-30.94]</span>
-<span class="fn">print</span>(lr.coef_, lr.intercept_)    <span class="cm"># [-0.0743, 1.1265] 2.0916</span>
-<span class="fn">print</span>(lr.score(train_poly, train_target))  <span class="cm"># 0.8551</span>
-<span class="fn">print</span>(lr.score(test_poly, test_target))    <span class="cm"># 0.7745</span></code></pre>
-            </div>
-
-            <div class="code tabpanel" id="panel-22" role="tabpanel" aria-labelledby="tab-22" hidden>
-              <div class="code__bar">
-                <span class="code__dots"><i></i><i></i><i></i></span>
-                <span class="code__name">2-2_preprocessing.py</span>
-                <button class="copy" type="button">copy</button>
-              </div>
-              <pre><code><span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> KNeighborsClassifier
-
-<span class="cm"># 두 특성을 하나의 2차원 배열로</span>
-bird_data = np.column_stack((beak_length, beak_height))
-bird_target = np.concatenate((np.ones(<span class="nm">35</span>), np.zeros(<span class="nm">14</span>)))
-
-<span class="cm"># 클래스 비율을 유지하며 분할</span>
-train_input, test_input, train_target, test_target = train_test_split(
-    bird_data, bird_target, stratify=bird_target, random_state=<span class="nm">42</span>)
-
-<span class="cm"># 훈련 세트 기준으로 표준화 (테스트에도 같은 mean/std)</span>
-mean = np.mean(train_input, axis=<span class="nm">0</span>)
-std = np.std(train_input, axis=<span class="nm">0</span>)
-train_scaled = (train_input - mean) / std
-test_scaled = (test_input - mean) / std
-
-kn = KNeighborsClassifier().fit(train_scaled, train_target)
-<span class="fn">print</span>(kn.score(test_scaled, test_target))  <span class="cm"># 1.0</span>
-
-<span class="cm"># 새 샘플도 같은 기준으로 변환해야 한다</span>
-new = ([<span class="nm">11.5</span>, <span class="nm">4.0</span>] - mean) / std
-<span class="fn">print</span>(kn.predict([new]))                   <span class="cm"># [0.]</span></code></pre>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ 09 ============ -->
-        <section class="section reveal" id="quiz">
-          <div class="section__head">
-            <p class="section__num">09 — Check</p>
-            <h2>확인 문제</h2>
-            <p>교재의 확인 문제와 이번 실습에서 헷갈리기 쉬운 지점을 골랐습니다. 보기를 누르면 정답과 해설이 나옵니다.</p>
-          </div>
-
-          <div class="quiz" id="quizList">
-            <article class="q" data-answer="2">
-              <div class="q__head"><span class="q__n">Q1</span><span class="q__text">k-최근접 이웃 회귀는 새로운 샘플의 타깃을 어떻게 예측할까요?</span></div>
-              <div class="opts">
-                <button class="opt" type="button"><b>1</b>이웃 샘플 클래스 중 다수인 클래스</button>
-                <button class="opt" type="button"><b>2</b>이웃 샘플 타깃값의 평균</button>
-                <button class="opt" type="button"><b>3</b>이웃 샘플 중 가장 높은 타깃값</button>
-                <button class="opt" type="button"><b>4</b>이웃 샘플 중 가장 낮은 타깃값</button>
-              </div>
-              <p class="q__why">분류는 다수결, 회귀는 평균입니다. 타깃이 클래스가 아니라 연속값이기 때문입니다.</p>
-            </article>
-
-            <article class="q" data-answer="1">
-              <div class="q__head"><span class="q__n">Q2</span><span class="q__text">다음 중 과대적합을 가장 잘 설명한 것은?</span></div>
-              <div class="opts">
-                <button class="opt" type="button"><b>1</b>훈련 점수는 높은데 테스트 점수가 크게 낮다</button>
-                <button class="opt" type="button"><b>2</b>훈련 점수는 낮은데 테스트 점수가 더 높다</button>
-                <button class="opt" type="button"><b>3</b>훈련과 테스트 점수가 모두 낮다</button>
-                <button class="opt" type="button"><b>4</b>훈련과 테스트 점수가 거의 같다</button>
-              </div>
-              <p class="q__why">훈련 세트에만 지나치게 맞은 상태입니다. 3-2의 다항 5차 모델(훈련 1.0, 테스트 −144.4)이 전형적인 예입니다.</p>
-            </article>
-
-            <article class="q" data-answer="4">
-              <div class="q__head"><span class="q__n">Q3</span><span class="q__text">선형 회귀 모델이 찾은 방정식의 계수를 무엇이라고 부르나요?</span></div>
-              <div class="opts">
-                <button class="opt" type="button"><b>1</b>회귀 파라미터</button>
-                <button class="opt" type="button"><b>2</b>선형 파라미터</button>
-                <button class="opt" type="button"><b>3</b>학습 파라미터</button>
-                <button class="opt" type="button"><b>4</b>모델 파라미터</button>
-              </div>
-              <p class="q__why">모델이 데이터에서 학습한 값을 모델 파라미터라고 합니다. <code class="mono">coef_</code>와 <code class="mono">intercept_</code>에 저장됩니다.</p>
-            </article>
-
-            <article class="q" data-answer="1">
-              <div class="q__head"><span class="q__n">Q4</span><span class="q__text">사이킷런에서 다항 회귀 모델을 훈련할 수 있는 클래스는?</span></div>
-              <div class="opts">
-                <button class="opt" type="button"><b>1</b>LinearRegression</button>
-                <button class="opt" type="button"><b>2</b>PolynomialRegression</button>
-                <button class="opt" type="button"><b>3</b>KNeighborsClassifier</button>
-                <button class="opt" type="button"><b>4</b>PolynomialClassifier</button>
-              </div>
-              <p class="q__why">제곱 항을 특성으로 추가한 뒤에도 LinearRegression을 그대로 씁니다. 다항식도 계수에 대해서는 선형이기 때문입니다.</p>
-            </article>
-
-            <article class="q" data-answer="3">
-              <div class="q__head"><span class="q__n">Q5</span><span class="q__text">릿지와 라쏘의 차이로 옳은 것은?</span></div>
-              <div class="opts">
-                <button class="opt" type="button"><b>1</b>릿지는 분류, 라쏘는 회귀에만 쓴다</button>
-                <button class="opt" type="button"><b>2</b>라쏘는 규제를 전혀 하지 않는다</button>
-                <button class="opt" type="button"><b>3</b>라쏘는 계수를 0으로 만들 수 있다</button>
-                <button class="opt" type="button"><b>4</b>릿지와 라쏘는 alpha를 쓸 수 없다</button>
-              </div>
-              <p class="q__why">릿지는 계수 제곱(L2), 라쏘는 절댓값(L1)을 규제합니다. 라쏘는 계수를 완전히 0으로 만들어 특성 선택 효과를 냅니다.</p>
-            </article>
-          </div>
-
-          <div class="quiz__score">
-            <span>정답 <b id="quizScore">0</b> / 5</span>
-            <button class="quiz__reset" type="button" id="quizReset">다시 풀기</button>
-          </div>
-        </section>
-
-        <!-- ============ 10 ============ -->
-        <section class="section reveal" id="notes">
-          <div class="section__head">
-            <p class="section__num">10 — Notes</p>
-            <h2>필기와 참고 자료</h2>
-            <p>3-1 실습 때 손으로 적은 노트입니다. 이미지를 누르면 크게 볼 수 있습니다.</p>
-          </div>
-
-          <div class="notes-grid">
-            <figure class="note-frame" id="noteFrame" tabindex="0" role="button" aria-label="필기 이미지 크게 보기">
-              <img src="assets/notes-3-1.jpg" alt="3-1 k-최근접 이웃 회귀 실습 손글씨 필기" loading="lazy">
-              <figcaption>
-                <span>3-1 실습 필기 · 손글씨 스캔</span>
-                <span class="mono">CLICK TO ZOOM</span>
-              </figcaption>
-            </figure>
-
-            <div>
-              <div class="sources">
-                <a class="source source--pdf" href="#notes">
-                  <span class="source__tag">PDF</span>
-                  <span><b>혼공머신 3장 · 회귀 알고리즘과 모델 규제</b><span>교재 114–172쪽. 3-1 / 3-2 / 3-3의 개념과 실습 흐름을 참고했습니다.</span></span>
-                </a>
-                <a class="source source--nb" href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-2-2/2-2.ipynb" target="_blank" rel="noopener">
-                  <span class="source__tag">NB</span>
-                  <span><b>2-2 · 데이터 전처리</b><span>두 특성으로 분류, stratify, 표준화 — 이번 장의 출발점</span></span>
-                </a>
-                <a class="source source--nb" href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-1/3-1.ipynb" target="_blank" rel="noopener">
-                  <span class="source__tag">NB</span>
-                  <span><b>3-1 · k-최근접 이웃 회귀</b><span>핀치부리새 데이터로 바꿔 실습한 회귀 노트북</span></span>
-                </a>
-                <a class="source source--nb" href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/MLB-3-2/3-2.ipynb" target="_blank" rel="noopener">
-                  <span class="source__tag">NB</span>
-                  <span><b>3-2 · 선형 회귀</b><span>KNN의 한계, 선형·다항 회귀를 같은 데이터로 실습</span></span>
-                </a>
-                <a class="source" href="https://github.com/rlaguswl25808134-source/AID-MLB/blob/master/3-3.ipynb" target="_blank" rel="noopener">
-                  <span class="source__tag">REF</span>
-                  <span><b>3-3 · 특성 공학과 규제</b><span>이번 주에는 실습하지 않고 개념만 정리 (교재 원본 노트북 링크)</span></span>
-                </a>
-              </div>
-              <p class="tbl-note" style="margin-top: 12px;">교재 PDF는 저작권 문제로 사이트에 함께 올리지 않았습니다. 노트북 링크는 원본 저장소로 연결됩니다.</p>
-            </div>
-          </div>
-        </section>
-
-      </div><!-- /.main -->
-    </div><!-- /.layout -->
-  </div><!-- /.page -->
-</main>
-
-<footer class="footer">
-  <div class="footer__inner">
-    <div>
-      <b>AID 스터디 · 혼공머신 3장 학습 노트</b>
-      <p>회귀 알고리즘과 모델 규제 · 3-1 / 3-2 실습, 3-3 개념 정리<br>
-      데이터: 핀치부리새 49마리 · 도구: Python, scikit-learn, matplotlib</p>
+    <h3>특성을 늘리면 과대적합이 온다</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>모델</th><th class="num">훈련 R²</th><th class="num">테스트 R²</th></tr></thead>
+        <tbody>
+          <tr><td>다중 회귀 (2차)</td><td class="num">0.9903</td><td class="num">0.9715</td></tr>
+          <tr><td>다중 회귀 (5차)</td><td class="num">1.0000</td><td class="num">−144.41</td></tr>
+          <tr><td>릿지 α = 0.1</td><td class="num">0.9904</td><td class="num">0.9828</td></tr>
+          <tr><td>릿지 α = 1</td><td class="num">0.9896</td><td class="num">0.9791</td></tr>
+          <tr><td>라쏘 α = 10</td><td class="num">0.9888</td><td class="num">0.9824</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p class="mono">정리 2026. 10. · <a href="#top">맨 위로 ↑</a></p>
-  </div>
-</footer>
+    <p class="cap">5차 모델은 훈련 세트를 완벽히 외워 R²가 1이지만, 테스트 점수는 음수까지 떨어집니다. 55개 특성에 42개 샘플뿐이라 생기는 일입니다.</p>
 
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="필기 이미지 확대">
-  <button type="button" id="lightboxClose" aria-label="닫기">×</button>
-  <img src="assets/notes-3-1.jpg" alt="3-1 k-최근접 이웃 회귀 실습 손글씨 필기 확대">
-</div>
+    <p><strong>규제</strong>는 계수 크기를 줄여 이 과대적합을 누릅니다. 릿지는 계수를 작게 만들고, 라쏘는 아예 0으로 만들어 버립니다(α = 10에서 55개 중 40개가 0).</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="sec" id="review">
+    <h2><span class="no">06</span> 회고</h2>
+    <blockquote>
+      같은 데이터라도 질문을 바꾸면 모델도 지표도 달라진다는 게 이번 주의 가장 큰 수확이었습니다.
+      분류에서 1.0이던 정확도가 회귀에서는 R² 0.98이 되고, k 하나로 모델의 성격이 바뀌는 걸 직접 봤습니다.
+      특히 KNN이 30.0을 2.8이라고 답한 순간, "모델이 모르는 것"을 모델이 말해 주는 방법이 필요하다는 걸 느꼈습니다.
+    </blockquote>
+
+    <figure class="figure figure--scan">
+      <img src="assets/notes-3-1.jpg" alt="3-1 k-최근접 이웃 회귀를 공부하며 쓴 손글씨 필기" loading="lazy">
+      <figcaption>3-1 필기. 손으로 정리한 내용은 이미지로만 남겨 두었습니다.</figcaption>
+    </figure>
+  </section>
+
+  <footer class="foot">
+    <p>이 노트는 GitHub Pages로 공유한 스터디 기록입니다.</p>
+    <p><a href="https://github.com/rlaguswl25808134-source/AID-MLB-3week" target="_blank" rel="noopener">저장소 보기</a> · 교재 PDF는 저작권 문제로 올리지 않았습니다.</p>
+  </footer>
+
+</main>
 
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
