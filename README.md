@@ -58,5 +58,3 @@ python -m http.server 8000
 
 GitHub Pages, `main` 브랜치 루트.
 https://rlaguswl25808134-source.github.io/AID-MLB-3week/
-
-교재 PDF는 저작권 문제로 포함하지 않았습니다.
