@@ -1,7 +1,4 @@
-/* =========================================================
-   혼공머신 3장 학습 노트 — 차트와 슬라이더
-   외부 라이브러리 없이 SVG로 직접 그립니다.
-   ========================================================= */
+/* 혼공머신 3장 — 차트 두 개와 k 슬라이더 */
 (() => {
   'use strict';
 
@@ -9,7 +6,6 @@
   const TRAIN = typeof FINCH_TRAIN !== 'undefined' ? FINCH_TRAIN : [];
   const TEST = typeof FINCH_TEST !== 'undefined' ? FINCH_TEST : [];
   const ALL = typeof FINCH_ALL !== 'undefined' ? FINCH_ALL : [];
-  const TRAIN22 = typeof FINCH22_TRAIN !== 'undefined' ? FINCH22_TRAIN : TRAIN;
 
   const $ = (s, r = document) => r.querySelector(s);
 
@@ -26,7 +22,7 @@
     return t;
   }
 
-  /* ---------- math ---------- */
+  /* ---------- 계산 ---------- */
 
   const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
 
@@ -38,8 +34,7 @@
   }
 
   function knnPredict(x, k) {
-    const nb = knnNeighbors(x, k);
-    return mean(nb.map(p => p.y));
+    return mean(knnNeighbors(x, k).map(p => p.y));
   }
 
   function r2(pairs, predict) {
@@ -52,11 +47,8 @@
     return 1 - res / tot;
   }
 
-  function mae(pairs, predict) {
-    return mean(pairs.map(([x, y]) => Math.abs(y - predict(x))));
-  }
+  const mae = (pairs, predict) => mean(pairs.map(([x, y]) => Math.abs(y - predict(x))));
 
-  /* 최소제곱: y = ax + b */
   function fitLine(pairs) {
     const mx = mean(pairs.map(p => p[0]));
     const my = mean(pairs.map(p => p[1]));
@@ -66,7 +58,7 @@
     return x => a * x + (my - a * mx);
   }
 
-  /* 최소제곱: y = c2 x^2 + c1 x + c0 (3x3 정규방정식) */
+  /* 3x3 정규방정식으로 y = c2 x^2 + c1 x + c0 */
   function fitQuad(pairs) {
     const S = [0, 0, 0, 0, 0], T = [0, 0, 0];
     for (const [x, y] of pairs) {
@@ -86,14 +78,14 @@
     return x => c2 * x * x + c1 * x + c0;
   }
 
-  /* ---------- chart frame ---------- */
+  /* ---------- 차트 뼈대 ---------- */
 
-  const PAD = { t: 16, r: 18, b: 36, l: 40 };
+  const PAD = { t: 14, r: 16, b: 34, l: 38 };
 
-  function frame(mount, { xd, yd, xticks, yticks, xlabel, ylabel, height }) {
+  function frame(mount, { xd, yd, xticks, yticks, xlabel, ylabel }) {
     mount.innerHTML = '';
     const W = Math.max(240, Math.round(mount.clientWidth || 600));
-    const H = height || Math.round(Math.min(330, Math.max(215, W * 0.55)));
+    const H = Math.round(Math.min(320, Math.max(210, W * 0.52)));
     const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'presentation' }, mount);
 
     const X = v => PAD.l + (v - xd[0]) / (xd[1] - xd[0]) * (W - PAD.l - PAD.r);
@@ -103,80 +95,32 @@
       el('line', { x1: PAD.l, x2: W - PAD.r, y1: Y(t), y2: Y(t), class: 'grid' }, svg);
       text(svg, PAD.l - 8, Y(t) + 3.5, String(t), 'tick', 'end');
     }
-    for (const t of xticks) {
-      text(svg, X(t), H - PAD.b + 16, String(t), 'tick');
-    }
+    for (const t of xticks) text(svg, X(t), H - PAD.b + 16, String(t), 'tick');
 
     el('line', { x1: PAD.l, x2: W - PAD.r, y1: H - PAD.b, y2: H - PAD.b, class: 'axis' }, svg);
     el('line', { x1: PAD.l, x2: PAD.l, y1: PAD.t, y2: H - PAD.b, class: 'axis' }, svg);
 
-    text(svg, (PAD.l + W - PAD.r) / 2, H - 4, xlabel, 'axtitle');
+    text(svg, (PAD.l + W - PAD.r) / 2, H - 3, xlabel, 'axtitle');
     const cy = (PAD.t + H - PAD.b) / 2;
-    const yl = text(svg, 14, cy, ylabel, 'axtitle');
-    yl.setAttribute('transform', `rotate(-90 14 ${cy})`);
+    const yl = text(svg, 13, cy, ylabel, 'axtitle');
+    yl.setAttribute('transform', `rotate(-90 13 ${cy})`);
 
     const series = el('g', {}, svg);
     return { X, Y, series, W, H };
   }
 
-  function dots(g, pairs, cls, r = 3.6) {
-    for (const [x, y] of pairs) el('circle', { cx: g.X(x), cy: g.Y(y), r, class: cls }, g.series);
-  }
+  const dots = (g, pairs, cls, r = 3.4) =>
+    pairs.forEach(([x, y]) => el('circle', { cx: g.X(x), cy: g.Y(y), r, class: cls }, g.series));
 
-  function curve(g, fn, from, to, cls, step = 0.05) {
+  function curve(g, fn, from, to, cls) {
     let d = '';
-    for (let x = from; x <= to + 1e-9; x += step) {
+    for (let x = from; x <= to + 1e-9; x += 0.05) {
       d += (d ? 'L' : 'M') + g.X(x).toFixed(1) + ' ' + g.Y(fn(x)).toFixed(1);
     }
     el('path', { d, class: cls }, g.series);
   }
 
-  /* ---------- 1) 2-2 분류 복습 ---------- */
-
-  const MYSTERY = [11.5, 4.0];
-
-  function drawRecap() {
-    const mount = $('#chart-22');
-    if (!mount) return;
-    const g = frame(mount, {
-      xd: [7.8, 16], yd: [2.4, 7.3],
-      xticks: [8, 10, 12, 14, 16], yticks: [3, 4, 5, 6, 7],
-      xlabel: '부리 길이', ylabel: '부리 높이'
-    });
-
-    dots(g, TRAIN22.filter(p => p[0] < 11.5), 'pt-a');
-    dots(g, TRAIN22.filter(p => p[0] >= 11.5), 'pt-b');
-
-    TRAIN22
-      .map(p => ({ p, d: (p[0] - MYSTERY[0]) ** 2 + (p[1] - MYSTERY[1]) ** 2 }))
-      .sort((a, b) => a.d - b.d)
-      .slice(0, 5)
-      .forEach(n => el('circle', {
-        cx: g.X(n.p[0]), cy: g.Y(n.p[1]), r: 6.5, class: 'neighbor'
-      }, g.series));
-
-    const mx = g.X(MYSTERY[0]), my = g.Y(MYSTERY[1]);
-    el('path', {
-      d: `M${mx} ${my - 7}L${mx + 6.5} ${my + 4.5}L${mx - 6.5} ${my + 4.5}Z`,
-      class: 'pt-tri'
-    }, g.series);
-  }
-
-  /* ---------- 2) 데이터 미리보기 ---------- */
-
-  function drawData() {
-    const mount = $('#chart-data');
-    if (!mount) return;
-    const g = frame(mount, {
-      xd: [7.8, 16], yd: [2.4, 7.3],
-      xticks: [8, 10, 12, 14, 16], yticks: [3, 4, 5, 6, 7],
-      xlabel: '부리 길이', ylabel: '부리 높이'
-    });
-    dots(g, ALL.filter(p => p[0] < 11), 'pt-a');
-    dots(g, ALL.filter(p => p[0] >= 11), 'pt-b');
-  }
-
-  /* ---------- 2) KNN 슬라이더 ---------- */
+  /* ---------- 1) KNN 회귀 ---------- */
 
   const PROBE = 10;
 
@@ -190,32 +134,26 @@
     });
 
     dots(g, TRAIN, 'pt-a');
-    dots(g, TEST, 'pt-b', 3.4);
-    curve(g, x => knnPredict(x, k), 8, 15.6, 'curve-a', 0.05);
+    dots(g, TEST, 'pt-b', 3.2);
+    curve(g, x => knnPredict(x, k), 8, 15.6, 'curve-a');
 
     const pred = knnPredict(PROBE, k);
     el('line', {
       x1: g.X(PROBE), x2: g.X(PROBE),
       y1: g.H - PAD.b, y2: g.Y(pred), class: 'probe'
     }, g.series);
-    for (const nb of knnNeighbors(PROBE, k)) {
-      el('circle', { cx: g.X(nb.x), cy: g.Y(nb.y), r: 7, class: 'neighbor' }, g.series);
-    }
-    el('circle', { cx: g.X(PROBE), cy: g.Y(pred), r: 5.2, class: 'mark' }, g.series);
-    text(g.series, g.X(PROBE) + 8, g.Y(pred) - 10, `예측 ${pred.toFixed(2)}`, 'tag', 'start');
+    el('circle', { cx: g.X(PROBE), cy: g.Y(pred), r: 4.6, class: 'mark' }, g.series);
 
     const train = r2(TRAIN, x => knnPredict(x, k));
     const test = r2(TEST, x => knnPredict(x, k));
     const err = mae(TEST, x => knnPredict(x, k));
 
-    $('#knnTrain').textContent = train.toFixed(4);
-    $('#knnTest').textContent = test.toFixed(4);
-    $('#knnMae').textContent = err.toFixed(4);
     $('#kOut').textContent = k;
-    $('#knnNote').textContent = `k = ${k}일 때 길이 ${PROBE.toFixed(1)} → 높이 ${pred.toFixed(2)}를 예측합니다.`;
+    $('#knnStats').textContent =
+      `훈련 R² ${train.toFixed(4)} · 테스트 R² ${test.toFixed(4)} · MAE ${err.toFixed(4)} · 10.0 예측 ${pred.toFixed(2)}`;
   }
 
-  /* ---------- 3) 세 모델 비교 ---------- */
+  /* ---------- 2) 세 모델 비교 ---------- */
 
   function drawCompare() {
     const mount = $('#chart-compare');
@@ -226,32 +164,36 @@
       xlabel: '부리 길이', ylabel: '부리 높이'
     });
 
-    dots(g, ALL, 'pt-ghost', 3);
+    dots(g, ALL, 'pt-ghost', 2.8);
     curve(g, x => knnPredict(x, 3), 8, 15.6, 'curve-a');
     curve(g, fitLine(TRAIN), 8, 16, 'curve-b');
     curve(g, fitQuad(TRAIN), 8, 16, 'curve-c');
   }
 
-  /* ---------- init ---------- */
+  /* ---------- 시작 ---------- */
 
-  function renderAll() {
-    drawRecap();
-    drawData();
-    drawKnn(Number($('#kRange').value));
-    drawCompare();
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
+  function init() {
     const range = $('#kRange');
     if (!range) return;
 
-    renderAll();
+    const redraw = () => {
+      drawKnn(Number(range.value));
+      drawCompare();
+    };
+
+    redraw();
     range.addEventListener('input', () => drawKnn(Number(range.value)));
 
     let t;
     window.addEventListener('resize', () => {
       clearTimeout(t);
-      t = setTimeout(renderAll, 150);
+      t = setTimeout(redraw, 150);
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
